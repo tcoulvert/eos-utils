@@ -26,6 +26,9 @@ parser.add_argument("--memory", default="10GB", help="RAM with which to submit t
 def find_nth(string: str, sub: str, n: int):
     index = 0
     for i in range(n):
+        if string.find(sub) < 0:
+            logger.warning(f"Requested {n} appearance of {sub}, but search broke on {i+1} appearance. Returning -1")
+            return -1
         index += (string.find(sub) + len(sub))
         string = string[index+len(sub):]
     return index
@@ -33,19 +36,35 @@ def find_nth(string: str, sub: str, n: int):
 def transfer_files():
     args = parser.parse_args()
 
-    origin_redirector = args.origin_filepath[:find_nth(args.origin_filepath, "//", 2)+1]
-    origin_filepath = os.path.join(args.origin_filepath[find_nth(args.origin_filepath, "//", 2)+1:], "")
-    destination_redirector = args.destination_filepath[:find_nth(args.destination_filepath, "//", 2)+1]
-    destination_filepath = os.path.join(args.destination_filepath[find_nth(args.destination_filepath, "//", 2)+1:], "")
+    if find_nth(args.origin_filepath, "//", 2) >= 0:
+        origin_redirector = args.origin_filepath[:find_nth(args.origin_filepath, "//", 2)+1]
+        origin_filepath = os.path.join(args.origin_filepath[find_nth(args.origin_filepath, "//", 2)+1:], "")
+    else:
+        origin_redirector = ""; origin_filepath = args.origin_filepath
+    if find_nth(args.destination_filepath, "//", 2) >= 0:
+        destination_redirector = args.destination_filepath[:find_nth(args.destination_filepath, "//", 2)+1]
+        destination_filepath = os.path.join(args.destination_filepath[find_nth(args.destination_filepath, "//", 2)+1:], "")
+    else:
+        destination_redirector = ""; destination_filepath = args.destination_filepath
+
+    if origin_redirector == "" and destination_redirector == "":
+        logger.error("Both the source and target paths don't have redirectors, wither this is entirely a local copy and should use `cp` or `eoscp`, or you forgot to input the reirectors. Exiting now.")
+        return 1
     
     jobs_dir = os.path.join(args.output_dir, subprocess.getoutput("date +%Y%m%d_%H%M%S"), "")
     if not os.path.exists(jobs_dir): os.makedirs(jobs_dir)
 
     # Making a temporary file containing a list of all the files that need to be transferred from one EOS space to another
     if args.grep_str != "...":
-        os.system(f"xrdfs {origin_redirector} ls -R {origin_filepath} | grep {args.grep_str} > temp.txt")
+        if origin_redirector != "":
+            os.system(f"xrdfs {origin_redirector} ls -R {origin_filepath} | grep {args.grep_str} > temp.txt")
+        else:
+            os.system(f"ls -R {origin_filepath} | grep {args.grep_str} > temp.txt")
     else:
-        os.system(f"xrdfs {origin_redirector} ls -R {origin_filepath} > temp.txt")
+        if origin_redirector != "":
+            os.system(f"xrdfs {origin_redirector} ls -R {origin_filepath} > temp.txt")
+        else:
+            os.system(f"ls -R {origin_filepath} > temp.txt")
 
     # Skimming output and keeping only real files (that have the right filetype, if given)
     files_to_copy = []
@@ -66,7 +85,10 @@ def transfer_files():
     if not args.force:
         skimmed_files_to_copy = []
         for file_to_copy in files_to_copy:
-            stat, out = subprocess.getstatusoutput(f"xrdfs {destination_redirector} ls {destination_filepath}{file_to_copy}")
+            if destination_redirector != "":
+                stat, out = subprocess.getstatusoutput(f"xrdfs {destination_redirector} ls {destination_filepath}{file_to_copy}")
+            else:
+                stat, out = subprocess.getstatusoutput(f"ls {destination_filepath}{file_to_copy}")
             if stat != 0: skimmed_files_to_copy.append(file_to_copy)
         files_to_copy = skimmed_files_to_copy
     if len(files_to_copy) < 1:
