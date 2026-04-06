@@ -1,0 +1,19 @@
+Metadata-Version: 2.4
+Name: eos-utils
+Version: 1.0.0
+Summary: A small package to hold useful EOS tools.
+Author-email: Thomas Sievert <63161166+tcoulvert@users.noreply.github.com>
+License-Expression: MIT
+Project-URL: Homepage, https://github.com/tcoulvert/eos-utils
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+
+# EOS-Utils
+
+A small project to hold some useful python scripts for working with EOS and the CERN distributed computing cluster systems. A short description of the various files is given below
+
+File copying:
+ * `copy_eos.py` - Copies a file (can be a directory or a file) files from a source path (can be local or remote, can include an EOS redirector) to a target path (can be local or remote, can include a redirector). There are optional features such as filepath grepping and filetype restriction. See the arguments of the script for details. 
+ * `get_voms.py` - Checks if the user's VOMS proxy is valid for a minimal number of hours, minimal time can be passed as an argument.
