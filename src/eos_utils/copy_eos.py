@@ -106,11 +106,6 @@ def copy_eos(
 
     if not condor:
         for file_to_copy in files_to_copy:
-            print(file_to_copy)
-            print(f'origin redirector: {origin_redirector}')
-            print(f'origin filepath: {origin_filepath}')
-            print(f'destination redirector: {destination_redirector}')
-            print(f'destination filepath: {destination_filepath}')
             cmd = ["xrdcp", "-f", origin_redirector+origin_filepath+file_to_copy, destination_redirector+destination_filepath+file_to_copy]
             if not force:
                 cmd.remove("-f")

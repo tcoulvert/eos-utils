@@ -8,11 +8,8 @@ from eos_utils import copy_eos
 def save_file_eos(object_: object, filepath: str, force: bool=False):
     if filepath.startswith('root://'):
         tmp_file = f"tmp_map{hash(filepath)}.{filepath[filepath.rfind('.')+1:]}"
-        print('saving tmp file')
         save_file(object_, tmp_file)
-        print('tmp file saved, copying to eos')
         copy_eos(tmp_file, filepath, force=force)
-        print('eos file copied')
         subprocess.run(['rm', tmp_file])
     else:
         save_file(object_, filepath)
