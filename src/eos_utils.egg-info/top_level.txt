@@ -1,1 +1,1 @@
-eos-utils
+eos_utils
