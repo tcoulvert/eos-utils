@@ -15,7 +15,7 @@ def load_file_eos(return_type: object, filepath: str):
     return object_
 def load_file(return_type: object, filepath: str):
     if return_type is dict and filepath[filepath.rfind('.')+1:] == 'json': 
-        with open(filepath, 'w') as f: object_ = json.load(f)
+        with open(filepath, 'r') as f: object_ = json.load(f)
     elif return_type is pd.DataFrame and filepath[filepath.rfind['.']+1:] == 'parquet':
         object_ = pd.read_parquet(filepath)
     else: raise NotImplementedError(f"Filetype saving not yet implemented, currently only supporting (\'json\' -> \'dict\'). Implement your own for more flexibility.")
