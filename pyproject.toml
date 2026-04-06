@@ -1,6 +1,6 @@
 [project]
 name = "eos-utils"
-version = "1.1.0"
+version = "1.2.0"
 authors = [
   { name="Thomas Sievert", email="63161166+tcoulvert@users.noreply.github.com" },
 ]

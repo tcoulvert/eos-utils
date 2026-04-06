@@ -10,7 +10,7 @@ def find_nth(string: str, sub: str, n: int):
     index = 0
     for i in range(n):
         if string.find(sub) < 0:
-            print(f"WARNING: Requested {n} appearance of {sub}, but search broke on {i+1} appearance. Returning -1")
+            print(f"WARNING: Requested {n} appearance(s) of {sub}, but search broke on {i+1} appearance. Returning -1")
             return -1
         index += (string.find(sub) + len(sub))
         string = string[index+len(sub):]
@@ -40,12 +40,14 @@ def copy_eos(
 
     if find_nth(origin_filepath, "//", 2) >= 0:
         origin_redirector = origin_filepath[:find_nth(origin_filepath, "//", 2)+1]
-        origin_filepath = os.path.join(origin_filepath[find_nth(origin_filepath, "//", 2)+1:], "")
+        origin_filepath = os.path.join(origin_filepath[find_nth(origin_filepath, "//", 2)+1:])
+        if '.' not in origin_filepath.split('/')[-1]: origin_filepath = os.path.join(origin_filepath, "")
     else:
         origin_redirector = ""; origin_filepath = origin_filepath
     if find_nth(destination_filepath, "//", 2) >= 0:
         destination_redirector = destination_filepath[:find_nth(destination_filepath, "//", 2)+1]
-        destination_filepath = os.path.join(destination_filepath[find_nth(destination_filepath, "//", 2)+1:], "")
+        destination_filepath = os.path.join(destination_filepath[find_nth(destination_filepath, "//", 2)+1:])
+        if '.' not in destination_filepath.split('/')[-1]: destination_filepath = os.path.join(destination_filepath, "")
     else:
         destination_redirector = ""; destination_filepath = destination_filepath
 
@@ -104,6 +106,11 @@ def copy_eos(
 
     if not condor:
         for file_to_copy in files_to_copy:
+            print(file_to_copy)
+            print(f'origin redirector: {origin_redirector}')
+            print(f'origin filepath: {origin_filepath}')
+            print(f'destination redirector: {destination_redirector}')
+            print(f'destination filepath: {destination_filepath}')
             cmd = ["xrdcp", "-f", origin_redirector+origin_filepath+file_to_copy, destination_redirector+destination_filepath+file_to_copy]
             if not force:
                 cmd.remove("-f")
