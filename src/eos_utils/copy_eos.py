@@ -1,20 +1,11 @@
 import os
 import subprocess
 
-from .get_voms import get_voms
+from eos_utils.get_voms import get_voms
+from eos_utils.get_redirector import get_redirector
 
 ################################
 
-
-def find_nth(string: str, sub: str, n: int):
-    index = 0
-    for i in range(n):
-        if string.find(sub) < 0:
-            print(f"WARNING: Requested {n} appearance(s) of {sub}, but search broke on {i+1} appearance. Returning -1")
-            return -1
-        index += (string.find(sub) + len(sub))
-        string = string[index+len(sub):]
-    return index
 
 def copy_eos(
     origin_filepath: str, destination_filepath: str,
@@ -38,18 +29,8 @@ def copy_eos(
      - memory: <str> RAM with which to submit the condor job.
     """
 
-    if find_nth(origin_filepath, "//", 2) >= 0:
-        origin_redirector = origin_filepath[:find_nth(origin_filepath, "//", 2)+1]
-        origin_filepath = os.path.join(origin_filepath[find_nth(origin_filepath, "//", 2)+1:])
-        if '.' not in origin_filepath.split('/')[-1]: origin_filepath = os.path.join(origin_filepath, "")
-    else:
-        origin_redirector = ""; origin_filepath = origin_filepath
-    if find_nth(destination_filepath, "//", 2) >= 0:
-        destination_redirector = destination_filepath[:find_nth(destination_filepath, "//", 2)+1]
-        destination_filepath = os.path.join(destination_filepath[find_nth(destination_filepath, "//", 2)+1:])
-        if '.' not in destination_filepath.split('/')[-1]: destination_filepath = os.path.join(destination_filepath, "")
-    else:
-        destination_redirector = ""; destination_filepath = destination_filepath
+    origin_redirector, origin_filepath = get_redirector(origin_filepath)
+    destination_redirector, destination_filepath = get_redirector(destination_filepath)
 
     if origin_redirector == "" and destination_redirector == "":
         print("ERROR: Both the source and target paths don't have redirectors, wither this is entirely a local copy and should use `cp` or `eoscp`, or you forgot to input the reirectors. Exiting now.")

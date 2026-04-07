@@ -3,9 +3,7 @@ import subprocess
 ################################
 
 
-def get_voms(
-    reqd_hrs: int=5
-):
+def get_voms(reqd_hrs: int=5):
     """
     A simple function that checks if the users VOMS proxy is valid for a minimal amount of time
 
