@@ -13,7 +13,7 @@ def save_file_eos(object_: object, filepath: str, force: bool=False):
         copy_eos(tmp_file, filepath, force=force)
         subprocess.run(['rm', tmp_file])
     else:
-        os.makedirs(filepath[filepath.rfind('.')+1:], exists_ok=True)
+        os.makedirs(filepath[filepath.rfind('.')+1:], exist_ok=True)
         save_file(object_, filepath)
 def save_file(object_: object, filepath: str):
     if type(object_) is dict and filepath[filepath.rfind('.')+1:] == 'json': 
