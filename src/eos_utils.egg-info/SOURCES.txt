@@ -2,7 +2,9 @@ README.md
 pyproject.toml
 src/eos_utils/__init__.py
 src/eos_utils/copy_eos.py
+src/eos_utils/get_redirector.py
 src/eos_utils/get_voms.py
+src/eos_utils/glob_eos.py
 src/eos_utils/load_file_eos.py
 src/eos_utils/save_file_eos.py
 src/eos_utils.egg-info/PKG-INFO

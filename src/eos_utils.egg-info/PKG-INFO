@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: eos-utils
-Version: 1.3.0
+Version: 1.4.0
 Summary: A small package to hold useful EOS tools.
 Author-email: Thomas Sievert <63161166+tcoulvert@users.noreply.github.com>
 License-Expression: MIT
