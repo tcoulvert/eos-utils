@@ -1,3 +1,4 @@
+import datetime
 import json
 import subprocess
 
@@ -7,7 +8,7 @@ from eos_utils import copy_eos
 
 def load_file_eos(return_type: object, filepath: str):
     if filepath.startswith('root://'):
-        tmp_file = f"tmp_map{hash(filepath)}.{filepath[filepath.rfind('.')+1:]}"
+        tmp_file = f"tmp_map{hash(filepath+datetime.now().strftime("%d-%m-%Y %H:%M:%S:%f"))}.{filepath[filepath.rfind('.')+1:]}"
         copy_eos(filepath, tmp_file)
         object_ = load_file(return_type, tmp_file); subprocess.run(['rm', tmp_file])
     else:
