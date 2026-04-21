@@ -41,7 +41,7 @@ def copy_eos(
     if not os.path.exists(jobs_dir): os.makedirs(jobs_dir)
 
     # Making a temporary file containing a list of all the files that need to be transferred from one EOS space to another
-    tmp_filename = f"tmp-{hash(origin_filepath+datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S-%f'))}.txt"
+    tmp_filename = f"tmp_copy-{hash(origin_filepath+datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S-%f'))}.txt"
     if grep_str != "...":
         if origin_redirector != "":
             os.system(f"xrdfs {origin_redirector} ls -R {origin_filepath} | grep {grep_str} > {tmp_filename}")
