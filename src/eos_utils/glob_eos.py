@@ -1,3 +1,4 @@
+import datetime
 import glob
 import os
 
@@ -15,10 +16,11 @@ def glob_eos(filepath: str, recursive: bool=False, include_hidden: bool=False):
             base_filepath, glob_paths = filepath, ['']
 
         list_cmnd = 'ls' + (' -R' if recursive else '') + (' -a' if include_hidden else '')
-        os.system(f"xrdfs {redirector} {list_cmnd} {base_filepath} > temp.txt")
+        tmp_filename = f"tmp-{hash(filepath+datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S-%f'))}.txt"
+        os.system(f"xrdfs {redirector} {list_cmnd} {base_filepath} > {tmp_filename}")
 
         globs = []
-        with open('temp.txt', 'r') as f:
+        with open(tmp_filename, 'r') as f:
             for line in f:
                 stdline = line.strip()
                 match_line = stdline[stdline.find(base_filepath)+len(base_filepath):]; save_line = True
@@ -27,6 +29,7 @@ def glob_eos(filepath: str, recursive: bool=False, include_hidden: bool=False):
                         match_line = match_line[match_line.find(glob_path)+len(glob_path):]
                     else: save_line = False; break
                 if save_line: globs.append(redirector+stdline)
+        os.system(f"rm {tmp_filename}")
     else:
         globs =  glob.glob(filepath, recursive=recursive, include_hidden=include_hidden)
     return globs

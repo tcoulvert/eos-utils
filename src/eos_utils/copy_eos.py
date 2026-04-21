@@ -1,3 +1,4 @@
+import datetime
 import os
 import subprocess
 
@@ -40,20 +41,21 @@ def copy_eos(
     if not os.path.exists(jobs_dir): os.makedirs(jobs_dir)
 
     # Making a temporary file containing a list of all the files that need to be transferred from one EOS space to another
+    tmp_filename = f"tmp-{hash(origin_filepath+datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S-%f'))}.txt"
     if grep_str != "...":
         if origin_redirector != "":
-            os.system(f"xrdfs {origin_redirector} ls -R {origin_filepath} | grep {grep_str} > temp.txt")
+            os.system(f"xrdfs {origin_redirector} ls -R {origin_filepath} | grep {grep_str} > {tmp_filename}")
         else:
-            os.system(f"ls -R {origin_filepath} | grep {grep_str} > temp.txt")
+            os.system(f"ls -R {origin_filepath} | grep {grep_str} > {tmp_filename}")
     else:
         if origin_redirector != "":
-            os.system(f"xrdfs {origin_redirector} ls -R {origin_filepath} > temp.txt")
+            os.system(f"xrdfs {origin_redirector} ls -R {origin_filepath} > {tmp_filename}")
         else:
-            os.system(f"ls -R {origin_filepath} > temp.txt")
+            os.system(f"ls -R {origin_filepath} > {tmp_filename}")
 
     # Skimming output and keeping only real files (that have the right filetype, if given)
     files_to_copy = []
-    with open("temp.txt", "r") as f:
+    with open(tmp_filename, "r") as f:
         for line in f:
             formatted_line = line.rstrip()
             end_of_filepath = formatted_line.split("/")[-1]
@@ -80,7 +82,7 @@ def copy_eos(
         return 1
 
     # Deleting the temp file
-    os.system(f"rm temp.txt")
+    os.system(f"rm {tmp_filename}")
 
     # Get proxy information (required in executable script for this method of running)
     proxy = get_voms()
