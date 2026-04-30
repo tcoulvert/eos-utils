@@ -37,11 +37,12 @@ def copy_eos(
         print("ERROR: Both the source and target paths don't have redirectors, wither this is entirely a local copy and should use `cp` or `eoscp`, or you forgot to input the reirectors. Exiting now.")
         return 1
     
-    jobs_dir = os.path.join(output_dir, subprocess.getoutput("date +%Y%m%d_%H%M%S"), "")
-    os.makedirs(jobs_dir, exist_ok=True)
+    if condor:
+        jobs_dir = os.path.join(output_dir, subprocess.getoutput("date +%Y%m%d_%H%M%S"), "")
+        os.makedirs(jobs_dir, exist_ok=True)
 
     # Making a temporary file containing a list of all the files that need to be transferred from one EOS space to another
-    tmp_filename = f".tmp_copy-{hash(origin_filepath+datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S-%f'))}.txt"
+    tmp_filename = f".tmp_copy-{hash(origin_filepath+destination_filepath+datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S-%f'))}.txt"
     if grep_str != "...":
         if origin_redirector != "":
             os.system(f"xrdfs {origin_redirector} ls -R {origin_filepath} | grep {grep_str} > {tmp_filename}")
@@ -68,6 +69,9 @@ def copy_eos(
             ): 
                 files_to_copy.append(formatted_line[formatted_line.find(origin_filepath)+len(origin_filepath):])
 
+    # Deleting the temp file
+    os.remove(tmp_filename)
+
     # Remove already transferred files if not forcing
     if not force:
         skimmed_files_to_copy = []
@@ -80,9 +84,6 @@ def copy_eos(
         files_to_copy = skimmed_files_to_copy
     if len(files_to_copy) < 1:
         return 1
-
-    # Deleting the temp file
-    os.remove(tmp_filename)
 
     # Get proxy information (required in executable script for this method of running)
     proxy = get_voms()
