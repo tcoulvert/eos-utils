@@ -38,10 +38,10 @@ def copy_eos(
         return 1
     
     jobs_dir = os.path.join(output_dir, subprocess.getoutput("date +%Y%m%d_%H%M%S"), "")
-    if not os.path.exists(jobs_dir): os.makedirs(jobs_dir)
+    os.makedirs(jobs_dir, exist_ok=True)
 
     # Making a temporary file containing a list of all the files that need to be transferred from one EOS space to another
-    tmp_filename = f"tmp_copy-{hash(origin_filepath+datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S-%f'))}.txt"
+    tmp_filename = f".tmp_copy-{hash(origin_filepath+datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S-%f'))}.txt"
     if grep_str != "...":
         if origin_redirector != "":
             os.system(f"xrdfs {origin_redirector} ls -R {origin_filepath} | grep {grep_str} > {tmp_filename}")
@@ -82,7 +82,7 @@ def copy_eos(
         return 1
 
     # Deleting the temp file
-    os.system(f"rm {tmp_filename}")
+    os.remove(tmp_filename)
 
     # Get proxy information (required in executable script for this method of running)
     proxy = get_voms()
@@ -115,7 +115,8 @@ def copy_eos(
 
             for i, file_to_copy in enumerate(files_to_copy):
                 executable_file.write(f"if [ $1 -eq {i} ]; then\n")
-                # executable_file.write(f"    echo \"Transfering {file_to_copy}\"\n")
+                executable_file.write(f"    echo \"Transfering {origin_redirector}{origin_filepath}{file_to_copy} to {destination_redirector}{destination_filepath}{file_to_copy}\"\n")
+                # print(f"    xrdcp{' -f' if force else ''} {origin_redirector}{origin_filepath}{file_to_copy} {destination_redirector}{destination_filepath}{file_to_copy}\n")
                 executable_file.write(f"    xrdcp{' -f' if force else ''} {origin_redirector}{origin_filepath}{file_to_copy} {destination_redirector}{destination_filepath}{file_to_copy}\n")
                 executable_file.write("fi\n")
 

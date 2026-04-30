@@ -9,7 +9,7 @@ from eos_utils import copy_eos
 
 def save_file_eos(object_: object, filepath: str, force: bool=False):
     if filepath.startswith('root://'):
-        tmp_file = f"tmp_save-{hash(filepath+datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S-%f'))}.{filepath[filepath.rfind('.')+1:]}"
+        tmp_file = f".tmp_save-{hash(filepath+datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S-%f'))}.{filepath[filepath.rfind('.')+1:]}"
         save_file(object_, tmp_file)
         copy_eos(tmp_file, filepath, force=force)
         subprocess.run(['rm', tmp_file])

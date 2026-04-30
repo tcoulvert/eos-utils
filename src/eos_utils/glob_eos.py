@@ -16,7 +16,7 @@ def glob_eos(filepath: str, recursive: bool=False, include_hidden: bool=False):
             base_filepath, glob_paths = filepath, ['']
 
         list_cmnd = 'ls' + (' -R' if recursive else '') + (' -a' if include_hidden else '')
-        tmp_filename = f"tmp-{hash(filepath+datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S-%f'))}.txt"
+        tmp_filename = f".tmp_glob-{hash(filepath+datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S-%f'))}.txt"
         os.system(f"xrdfs {redirector} {list_cmnd} {base_filepath} > {tmp_filename}")
 
         globs = []
