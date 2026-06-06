@@ -1,24 +1,21 @@
 import datetime
+import fcntl
 import json
-import os
-import subprocess
+from concurrent.futures as ft
 
-import pandas as pd
+from eos_utils import copy_eos, watch_tmp
 
-from eos_utils import copy_eos
+def blocked_save(tmp_filepath: str, eos_filepath: str, watch_result: ft.Future, **kwargs):
+    if watch_result.result(): 
+        copy_eos(tmp_filepath, eos_filepath, *kwargs); os.remove(tmp_filepath)
 
-def save_file_eos(object_: object, filepath: str, force: bool=False):
-    if filepath.startswith('root://'):
-        tmp_file = f".tmp_save-{hash(filepath+datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S-%f'))}.{filepath[filepath.rfind('.')+1:]}"
-        save_file(object_, tmp_file)
-        copy_eos(tmp_file, filepath, force=force)
-        subprocess.run(['rm', tmp_file])
+def save_file_eos(filepath: str, **kwargs):
+    if filepath.startswith('root://'):  # EOS redirector prefix
+        _filepath_ = f".tmp_save-{hash(filepath+datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S-%f'))}.{filepath[filepath.rfind('.')+1:]}"
+        with ft.ThreadPoolExecutor(max_workers=2) as executor:
+            watch_future = executor.submit(watch_tmp, _filepath_, *kwargs)
+            executor.submit(blocked_save, _filepath_, filepath, watch_future, *kwargs)
     else:
-        os.makedirs(filepath[filepath.rfind('.')+1:], exist_ok=True)
-        save_file(object_, filepath)
-def save_file(object_: object, filepath: str):
-    if type(object_) is dict and filepath[filepath.rfind('.')+1:] == 'json': 
-        with open(filepath, 'w') as f: json.dump(object_, f)
-    elif type(object_) is pd.DataFrame and filepath[filepath.rfind('.')+1:] == 'parquet': 
-        object_.to_parquet(filepath)
-    else: raise NotImplementedError(f"Filetype saving not yet implemented, currently only supporting (\'dict\' -> \'json\'), and (\'pd.DataFrame\' -> \'pyarrow.parquet\'). Implement your own for more flexibility.")
+        _filepath_ = filepath
+    return _filepath_
+

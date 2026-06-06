@@ -1,23 +1,21 @@
 import datetime
+import fcntl
 import json
-import subprocess
+from concurrent.futures as ft
 
-import pandas as pd
+from eos_utils import copy_eos, watch_tmp
 
-from eos_utils import copy_eos
+def blocked_remove(tmp_filepath: str, watch_result: ft.Future, **kwargs):
+    if watch_result.result(): 
+        os.remove(tmp_filepath)
 
-def load_file_eos(return_type: object, filepath: str):
-    if filepath.startswith('root://'):
-        tmp_file = f".tmp_load-{hash(filepath+datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S-%f'))}.{filepath[filepath.rfind('.')+1:]}"
-        copy_eos(filepath, tmp_file)
-        object_ = load_file(return_type, tmp_file); subprocess.run(['rm', tmp_file])
+def load_file_eos(filepath: str, **kwargs):
+    if filepath.startswith('root://'):  # EOS redirector prefix
+        _filepath_ = f".tmp_load-{hash(filepath+datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S-%f'))}.{filepath[filepath.rfind('.')+1:]}"
+        copy_eos(filepath, _filepath_, *kwargs)
+        with ft.ThreadPoolExecutor(max_workers=2) as executor:
+            watch_future = executor.submit(watch_tmp, _filepath_, *kwargs)
+            executor.submit(blocked_remove, _filepath_, watch_future, *kwargs)
     else:
-        object_ =  load_file(return_type, filepath)
-    return object_
-def load_file(return_type: object, filepath: str):
-    if return_type is dict and filepath[filepath.rfind('.')+1:] == 'json': 
-        with open(filepath, 'r') as f: object_ = json.load(f)
-    elif return_type is pd.DataFrame and filepath[filepath.rfind('.')+1:] == 'parquet':
-        object_ = pd.read_parquet(filepath)
-    else: raise NotImplementedError(f"Filetype saving not yet implemented, currently only supporting (\'json\' -> \'dict\'). Implement your own for more flexibility.")
-    return object_
+        _filepath_ = filepath
+    return _filepath_
