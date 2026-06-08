@@ -7,6 +7,7 @@ src/eos_utils/get_voms.py
 src/eos_utils/glob_eos.py
 src/eos_utils/load_file_eos.py
 src/eos_utils/save_file_eos.py
+src/eos_utils/watch_tmp.py
 src/eos_utils.egg-info/PKG-INFO
 src/eos_utils.egg-info/SOURCES.txt
 src/eos_utils.egg-info/dependency_links.txt
