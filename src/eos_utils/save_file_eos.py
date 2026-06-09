@@ -1,7 +1,5 @@
 import datetime
-import fcntl
-import json
-from concurrent.futures as ft
+import concurrent.futures as ft
 
 from eos_utils import copy_eos, watch_tmp
 
