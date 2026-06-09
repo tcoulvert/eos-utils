@@ -13,7 +13,9 @@ def watch_tmp(tmp_filepath: str, n: int=1, sleep_time: float=10, timeout: float=
 
         try: 
             os.rename(tmp_filepath, tmp_filepath); blocked = False
+            print('file NOT blocked')
         except:
-            times_blocked += 1; blocked = True
+            if not blocked: times_blocked += 1; blocked = True; print('file NOW blocked')
+            else: print('file STILL blocked')
         time.sleep(sleep_time)
     
