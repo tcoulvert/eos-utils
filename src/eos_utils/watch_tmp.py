@@ -1,21 +1,26 @@
 import os
 import time
+from pathlib import Path
 
-def watch_tmp(tmp_filepath: str, n: int=1, sleep_time: float=10, timeout: float=600):
-    times_blocked, blocked = 0, False
+def get_lockfilepath(tmp_filepath: str):
+    return tmp_filepath+'.lock'
+
+def create_lockfile(tmp_filepath: str):
+    Path(get_lockfilepath(tmp_filepath)).touch()
+
+def check_lockfile(tmp_filepath: str):
+    return os.path.exists(get_lockfilepath(tmp_filepath))
+
+def delete_lockfile(tmp_filepath: str):
+    if check_lockfile(tmp_filepath): os.remove(get_lockfilepath(tmp_filepath))
+
+def watch_tmp(tmp_filepath: str, sleeptime: int=1, timeout: float=600):
+    create_lockfile(tmp_filepath)
     
     start_watch_time = time.perf_counter()
     time_elapsed = lambda : time.perf_counter() - start_watch_time
-    while True:
-        
-        if times_blocked == n and not blocked: return True
-        if time_elapsed > timeout: return False
 
-        try: 
-            os.rename(tmp_filepath, tmp_filepath); blocked = False
-            print('file NOT blocked')
-        except:
-            if not blocked: times_blocked += 1; blocked = True; print('file NOW blocked')
-            else: print('file STILL blocked')
-        time.sleep(sleep_time)
-    
+    while time_elapsed() < timeout:
+        time.sleep(sleeptime)
+        if not check_lockfile(tmp_filepath): return True
+    return False

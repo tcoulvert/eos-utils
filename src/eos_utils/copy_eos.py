@@ -11,7 +11,8 @@ from eos_utils.get_redirector import get_redirector
 def copy_eos(
     origin_filepath: str, destination_filepath: str,
     grep_str: str="...", filetype_str: str="...", force: bool=False, 
-    condor: bool=False, output_dir: str=os.path.join(os.getcwd(), ".condor_copy_eos", ""), queue: str="longlunch", memory: str="4GB"
+    condor: bool=False, output_dir: str=os.path.join(os.getcwd(), ".condor_copy_eos", ""), queue: str="longlunch", memory: str="4GB",
+    **kwargs
 ):
     """
     A function that facilitates the transferring of (potentially large and many) files from one location to another, with at least one location being part of the CERN EOS filesystem.

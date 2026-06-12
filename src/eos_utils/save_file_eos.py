@@ -4,8 +4,8 @@ import concurrent.futures as ft
 
 from eos_utils import copy_eos, watch_tmp
 
-def blocked_save(tmp_filepath: str, eos_filepath: str, watch_result: ft.Future, ignore_failures: bool=False, **kwargs):
-    if watch_result.result(): 
+def blocked_save(tmp_filepath: str, eos_filepath: str, watch_future: ft.Future, ignore_failures: bool=False, **kwargs):
+    if watch_future.result(): 
         copy_eos(tmp_filepath, eos_filepath, **kwargs); os.remove(tmp_filepath)
     elif ignore_failures:
         print(f"WARNING: File saving for {tmp_filepath} to {eos_filepath} timed out, and \'ignore_failures\' is set to \'True\'. Continuing with other processes...")
@@ -15,9 +15,12 @@ def blocked_save(tmp_filepath: str, eos_filepath: str, watch_result: ft.Future, 
 def save_file_eos(filepath: str, max_workers: int=5, **kwargs):
     if filepath.startswith('root://'):  # EOS redirector prefix
         _filepath_ = f".tmp_save-{hash(filepath+datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S-%f'))}.{filepath[filepath.rfind('.')+1:]}"
-        with ft.ThreadPoolExecutor(max_workers=max_workers) as executor:
-            watch_future = executor.submit(watch_tmp, _filepath_, **kwargs)
-            executor.submit(blocked_save, _filepath_, filepath, watch_future, **kwargs)
+        
+        # Watch for file to be opened+closed and move to EOS
+        executor = ft.ThreadPoolExecutor(max_workers=max_workers)
+        watch_future = executor.submit(watch_tmp, _filepath_, **kwargs)
+        executor.submit(blocked_save, _filepath_, filepath, watch_future, **kwargs)
+        executor.shutdown(wait=False)
     else:
         _filepath_ = filepath
     return _filepath_
