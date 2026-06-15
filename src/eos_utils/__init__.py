@@ -3,7 +3,7 @@ from eos_utils.get_redirector import get_redirector
 
 from eos_utils.copy_eos import copy_eos 
 
-from eos_utils.watch_tmp import watch_tmp, delete_lockfile
+from eos_utils.watch_tmp import watch_tmp, create_lockfile, delete_lockfile
 
 from eos_utils.file_exists_eos import file_exists_eos
 

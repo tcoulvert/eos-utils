@@ -15,8 +15,6 @@ def delete_lockfile(tmp_filepath: str):
     if check_lockfile(tmp_filepath): os.remove(get_lockfilepath(tmp_filepath))
 
 def watch_tmp(tmp_filepath: str, sleeptime: int=1, timeout: float=600):
-    create_lockfile(tmp_filepath)
-    
     start_watch_time = time.perf_counter()
     time_elapsed = lambda : time.perf_counter() - start_watch_time
 
