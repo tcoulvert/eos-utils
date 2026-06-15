@@ -1,15 +1,11 @@
-import os
 import datetime
-import concurrent.futures as ft
+import os
+import threading
 
 from eos_utils import copy_eos, create_lockfile, watch_tmp
 
-def blocked_remove(tmp_filepath: str, watch_future: ft.Future, ignore_failures: bool=False, **kwargs):
-    if watch_future.result(): 
-        os.remove(tmp_filepath)
-    elif ignore_failures:
-        print(f"WARNING: Tmp file deletion for {tmp_filepath} timed out, and \'ignore_failures\' is set to \'True\'. Continuing with other processes...")
-    else: raise TimeoutError(f"ERROR: Tmp file deletion for {tmp_filepath} timed out, and \'ignore_failures\' is set to \'False\'.")
+def blocked_remove(tmp_filepath: str, **kwargs):
+    os.remove(tmp_filepath)
 
 def load_file_eos(filepath: str, max_workers: int=5, **kwargs):
     if filepath.startswith('root://'):  # EOS redirector prefix
@@ -18,10 +14,9 @@ def load_file_eos(filepath: str, max_workers: int=5, **kwargs):
         copy_eos(filepath, _filepath_, **kwargs)
 
         # Watch for file to be opened+closed and delete tmp
-        executor = ft.ThreadPoolExecutor(max_workers=max_workers)
-        watch_future = executor.submit(watch_tmp, _filepath_, **kwargs)
-        executor.submit(blocked_remove, _filepath_, watch_future, **kwargs)
-        executor.shutdown(wait=False)
+        lambda_remove = lambda: blocked_remove(_filepath_, **kwargs)
+        thread = threading.Thread(target=watch_tmp, args=(_filepath_, lambda_remove), kwargs=kwargs)
+        thread.start()
     else:
         _filepath_ = filepath
     return _filepath_

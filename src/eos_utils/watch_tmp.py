@@ -1,5 +1,6 @@
 import os
 import time
+from collections.abc import Callable
 from pathlib import Path
 
 def get_lockfilepath(tmp_filepath: str):
@@ -14,11 +15,11 @@ def check_lockfile(tmp_filepath: str):
 def delete_lockfile(tmp_filepath: str):
     if check_lockfile(tmp_filepath): os.remove(get_lockfilepath(tmp_filepath))
 
-def watch_tmp(tmp_filepath: str, sleeptime: int=1, timeout: float=600):
+def watch_tmp(tmp_filepath: str, func: Callable[[], None], sleeptime: int=1, timeout: float=600, **kwargs):
     start_watch_time = time.perf_counter()
     time_elapsed = lambda : time.perf_counter() - start_watch_time
 
     while time_elapsed() < timeout:
         time.sleep(sleeptime)
-        if not check_lockfile(tmp_filepath): return True
-    return False
+        if not check_lockfile(tmp_filepath): func(); return 0
+    raise TimeoutError(f"ERROR: Tmp file watching for {tmp_filepath} timed out.")
