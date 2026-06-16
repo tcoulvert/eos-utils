@@ -8,7 +8,7 @@ def blocked_save(tmp_filepath: str, eos_filepath: str, **kwargs):
     copy_eos(tmp_filepath, eos_filepath, **kwargs)
     os.remove(tmp_filepath)
 
-def save_file_eos(filepath: str, max_workers: int=5, **kwargs):
+def save_file_eos(filepath: str, **kwargs):
     if filepath.startswith('root://'):  # EOS redirector prefix
         _filepath_ = f".tmp_save-{hash(filepath+datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S-%f'))}.{filepath[filepath.rfind('.')+1:]}"
         create_lockfile(_filepath_)

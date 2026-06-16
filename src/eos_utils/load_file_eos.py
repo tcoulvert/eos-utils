@@ -7,7 +7,7 @@ from eos_utils import copy_eos, create_lockfile, watch_tmp
 def blocked_remove(tmp_filepath: str, **kwargs):
     os.remove(tmp_filepath)
 
-def load_file_eos(filepath: str, max_workers: int=5, **kwargs):
+def load_file_eos(filepath: str, **kwargs):
     if filepath.startswith('root://'):  # EOS redirector prefix
         _filepath_ = f".tmp_load-{hash(filepath+datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S-%f'))}.{filepath[filepath.rfind('.')+1:]}"
         create_lockfile(_filepath_)
