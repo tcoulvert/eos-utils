@@ -10,6 +10,8 @@ def glob_eos(filepath: str, recursive: bool=False, include_hidden: bool=False):
         redirector, filepath = get_redirector(filepath)
         proxy = get_voms()
 
+        if '/**/' in filepath and recursive:
+            filepath = filepath.replace('/**/', '/*')
         if '*' in filepath:
             base_filepath, glob_paths = filepath.split('*')[0], filepath.split('*')[1:]
         else:
@@ -31,5 +33,5 @@ def glob_eos(filepath: str, recursive: bool=False, include_hidden: bool=False):
                 if save_line: globs.append(redirector+stdline)
         os.system(f"rm {tmp_filename}")
     else:
-        globs =  glob.glob(filepath, recursive=recursive, include_hidden=include_hidden)
+        globs = glob.glob(filepath, recursive=recursive, include_hidden=include_hidden)
     return globs
