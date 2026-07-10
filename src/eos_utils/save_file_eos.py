@@ -19,4 +19,5 @@ def save_file_eos(filepath: str, **kwargs):
         thread.start()
     else:
         _filepath_ = filepath
+    if '/' in _filepath_: os.makedirs('/'.join(_filepath_.split('/')[:-1]), exist_ok=True)
     return _filepath_
